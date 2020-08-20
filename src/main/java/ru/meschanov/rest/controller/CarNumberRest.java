@@ -19,14 +19,11 @@ public class CarNumberRest {
         return service.getRandomCarNumber();
     }
 
-//    @GetMapping("/next")
-//    public String getNextNumber(@RequestParam String number) {
-//        return service.getNextNumber(number);
-//    }
-
     @GetMapping("/next")
-    public String getNextNumber() {
-        return service.getNextNumber(getRandomCarNumber());
+    public String getNextNumber(@RequestParam String number) {
+        return service.getNextNumber(number);
     }
+
+
 
 }

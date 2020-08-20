@@ -50,6 +50,11 @@ public class CarNumberServiceImpl implements CarNumberService {
         return numbIntoString;
     }
 
+    /**
+     * Метод генерирующий серию номера и объединяющий сгенерированной число с серией номера в формате "А001АА 116 RUS"
+     *
+     * @return возвращает автомобильный номер
+     */
     @Override
     public String getRandomCarNumber() {
         Random random = new Random();
@@ -68,13 +73,17 @@ public class CarNumberServiceImpl implements CarNumberService {
         return randomCarNumber;
     }
 
+    /**
+     * Метод последовательной выдачи номера
+     * @param number
+     * @return возвращает следующий номер
+     */
     @Override
     public String getNextNumber(String number) {
-        StringBuilder SBNextCarNumber = new StringBuilder();
+        StringBuilder sbNextCarNumber = new StringBuilder();
         String stringNextCarNumber = null;
         String nextDigitalPart;
-        StringBuilder nextSecondLetterPartLetter = new StringBuilder();
-        Pattern pattern = Pattern.compile("(^[АЕТОРНУКХСВМ])(\\d{3}(?<!000))([АЕТОРНУКХСВМ]{2})\\s116\\sRUS$");
+        Pattern pattern = Pattern.compile("(^[АВЕКМНОРСТУХ])(\\d{3}(?<!000))([АВЕКМНОРСТУХ]{2})\\s116\\sRUS$");
         Matcher matcher = pattern.matcher(number);
         if (!matcher.find()) {
             throw new RuntimeException("Невалидный номер");
@@ -82,7 +91,7 @@ public class CarNumberServiceImpl implements CarNumberService {
 
         List<String> numberList = new ArrayList<>();
 
-        for (int i = 0; i < matcher.groupCount(); i++) {
+        for (int i = 1; i <= matcher.groupCount(); i++) {
             numberList.add(matcher.group(i));
         }
 
@@ -97,73 +106,94 @@ public class CarNumberServiceImpl implements CarNumberService {
             nextDigitalPart = Integer.toString(digitalPart);
 
             if (digitalPart < 10) {
-                SBNextCarNumber.append(initialLetterPart);
-                SBNextCarNumber.append("00");
-                SBNextCarNumber.append(nextDigitalPart);
-                SBNextCarNumber.append(secondLetterPartArr[0]);
-                SBNextCarNumber.append(secondLetterPartArr[1]);
-                SBNextCarNumber.append(" 116 RUS");
-                stringNextCarNumber = SBNextCarNumber.toString();
+                sbNextCarNumber.append(initialLetterPart);
+                sbNextCarNumber.append("00");
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(secondLetterPartArr[0]);
+                sbNextCarNumber.append(secondLetterPartArr[1]);
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
                 return stringNextCarNumber;
-                // return  initialLetterPart + "00" + nextDigitalPart + secondLetterPartArr[0] + secondLetterPartArr[1];
+
             } else if (digitalPart < 100) {
-                SBNextCarNumber.append(initialLetterPart);
-                SBNextCarNumber.append("0");
-                SBNextCarNumber.append(nextDigitalPart);
-                SBNextCarNumber.append(secondLetterPartArr[0]);
-                SBNextCarNumber.append(secondLetterPartArr[1]);
-                SBNextCarNumber.append(" 116 RUS");
-                stringNextCarNumber = SBNextCarNumber.toString();
+                sbNextCarNumber.append(initialLetterPart);
+                sbNextCarNumber.append("0");
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(secondLetterPartArr[0]);
+                sbNextCarNumber.append(secondLetterPartArr[1]);
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
                 return stringNextCarNumber;
-                //  return initialLetterPart + "0" + nextDigitalPart + secondLetterPartArr[0] + secondLetterPartArr[1];
             }
-            SBNextCarNumber.append(initialLetterPart);
-            SBNextCarNumber.append(nextDigitalPart);
-            SBNextCarNumber.append(secondLetterPartArr[0]);
-            SBNextCarNumber.append(secondLetterPartArr[1]);
-            SBNextCarNumber.append(" 116 RUS");
-            stringNextCarNumber = SBNextCarNumber.toString();
+
+            sbNextCarNumber.append(initialLetterPart);
+            sbNextCarNumber.append(nextDigitalPart);
+            sbNextCarNumber.append(secondLetterPartArr[0]);
+            sbNextCarNumber.append(secondLetterPartArr[1]);
+            sbNextCarNumber.append(" 116 RUS");
+            stringNextCarNumber = sbNextCarNumber.toString();
+            carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
             return stringNextCarNumber;
-            //return initialLetterPart + nextDigitalPart + secondLetterPartArr[0] + secondLetterPartArr[1];
+
         } else if (digitalPart == 999) {
             nextDigitalPart = "001";
 
-            if (secondLetterPartArr[1] == ALPHABET.get(11)) {
-                SBNextCarNumber.append(initialLetterPart);
-                SBNextCarNumber.append(nextDigitalPart);
-                SBNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
-                SBNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
-                SBNextCarNumber.append(" 116 RUS");
-                stringNextCarNumber = SBNextCarNumber.toString();
+            if (initialLetterPartArr[0] == ALPHABET.get(0) &&
+                    secondLetterPartArr[1] == ALPHABET.get(11) &&
+                    secondLetterPartArr[0] == ALPHABET.get(11))
+            {
+                sbNextCarNumber.append(getNextLetter(initialLetterPartArr[0]));
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
                 return stringNextCarNumber;
-                // return initialLetterPart + nextDigitalPart + getNextLetter(secondLetterPartArr[0]) + getNextLetter(secondLetterPartArr[1]);
 
             } else if (secondLetterPartArr[1] == ALPHABET.get(11) && secondLetterPartArr[0] == ALPHABET.get(11)) {
-                SBNextCarNumber.append(getNextLetter(initialLetterPartArr[0]));
-                SBNextCarNumber.append(nextDigitalPart);
-                SBNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
-                SBNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
-                SBNextCarNumber.append(" 116 RUS");
-                stringNextCarNumber = SBNextCarNumber.toString();
+                sbNextCarNumber.append(getNextLetter(initialLetterPartArr[0]));
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
                 return stringNextCarNumber;
-                // return getNextLetter(initialLetterPartArr[0]) + nextDigitalPart + getNextLetter(secondLetterPartArr[0]) + getNextLetter(secondLetterPartArr[1]);
+
+            } else if (secondLetterPartArr[1] == ALPHABET.get(11)) {
+                sbNextCarNumber.append(initialLetterPart);
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
+                return stringNextCarNumber;
 
             } else {
-                SBNextCarNumber.append(initialLetterPart);
-                SBNextCarNumber.append(nextDigitalPart);
-                SBNextCarNumber.append(secondLetterPartArr[0]);
-                SBNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
-                SBNextCarNumber.append(" 116 RUS");
-                stringNextCarNumber = SBNextCarNumber.toString();
+                sbNextCarNumber.append(initialLetterPart);
+                sbNextCarNumber.append(nextDigitalPart);
+                sbNextCarNumber.append(secondLetterPartArr[0]);
+                sbNextCarNumber.append(getNextLetter(secondLetterPartArr[1]));
+                sbNextCarNumber.append(" 116 RUS");
+                stringNextCarNumber = sbNextCarNumber.toString();
+                carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
                 return stringNextCarNumber;
-                // return initialLetterPart + nextDigitalPart + secondLetterPartArr[0] + getNextLetter(secondLetterPartArr[1]);
             }
         }
-
         carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
-        return getNextNumber(number);
+        return stringNextCarNumber;
     }
 
+    /**
+     * Метод выдающий следующею букву алфавита
+     * @param letter
+     * @return возвращает следующею букву
+     */
     String getNextLetter(char letter) {
         String result = null;
         int lastLetterNumber = ALPHABET.size() - 1;
@@ -175,6 +205,4 @@ public class CarNumberServiceImpl implements CarNumberService {
         }
         return result;
     }
-
-
 }
