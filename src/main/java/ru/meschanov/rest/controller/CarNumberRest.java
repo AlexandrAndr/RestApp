@@ -1,13 +1,12 @@
 package ru.meschanov.rest.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import ru.meschanov.rest.domains.CarNumberEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.meschanov.rest.repository.CarNumberRepository;
 import ru.meschanov.rest.service.impl.CarNumberServiceImpl;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/number")
