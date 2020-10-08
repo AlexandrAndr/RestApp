@@ -1,5 +1,6 @@
 package ru.meschanov.rest.service.impl;
 
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import ru.meschanov.rest.domains.CarNumberEntity;
 import ru.meschanov.rest.repository.CarNumberRepository;
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
 public class CarNumberServiceImpl implements CarNumberService {
 
     private static final String NUMBER_FORMAT = "%s%s%s%s 116 RUS";
+    private static final Logger LOGGER = Logger.getLogger(CarNumberServiceImpl.class.getName());
 
     private static final List<Character> ALPHABET =
             Arrays.asList('А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'У', 'Х');
@@ -26,21 +28,16 @@ public class CarNumberServiceImpl implements CarNumberService {
         this.carNumberRepository = carNumberRepository;
     }
 
-    /**
-     * Метод генерации числа
-     *
-     * @return возвращает число в диапазоне от 1 до 999
-     */
-    private int generationNumb() {
+
+    @Override
+    public int generationNumb() {
+        LOGGER.debug("Генерируем число от 1 до 1000");
         return (int) ((Math.random() * (1 - 1000)) + 1000);
     }
 
-    /**
-     * Метод переводящий сгенерированное число в строку
-     *
-     * @return строковое представление числа
-     */
-    private String generationNumbIntoString(int numb) {
+    @Override
+    public String generationNumbIntoString(int numb) {
+        LOGGER.debug("Переводим сгенерированное число в строку");
         String numbIntoString = Integer.toString(numb);
         if (numb < 10) {
             return "00" + numbIntoString;
@@ -50,14 +47,10 @@ public class CarNumberServiceImpl implements CarNumberService {
         return numbIntoString;
     }
 
-    /**
-     * Метод генерирующий серию номера и объединяющий сгенерированной число с серией номера в формате "А001АА 116 RUS"
-     *
-     * @return возвращает автомобильный номер
-     */
     @Override
     public String getRandomCarNumber() {
         Random random = new Random();
+        LOGGER.debug("Создаем рандомный автомобильный номер");
         int initialLetter = random.nextInt(ALPHABET.size());
         int secondLetter = random.nextInt(ALPHABET.size());
         int thirdLetter = random.nextInt(ALPHABET.size());
@@ -73,18 +66,18 @@ public class CarNumberServiceImpl implements CarNumberService {
         return randomCarNumber;
     }
 
-    /**
-     * Метод последовательной выдачи номера
-     * @param number
-     * @return возвращает следующий номер
-     */
     @Override
     public String getNextNumber(String number) {
+
         StringBuilder sbNextCarNumber = new StringBuilder();
         String stringNextCarNumber = null;
         String nextDigitalPart;
+
+        LOGGER.debug("Проверяем автомобильный номер на валидность");
+
         Pattern pattern = Pattern.compile("(^[АВЕКМНОРСТУХ])(\\d{3}(?<!000))([АВЕКМНОРСТУХ]{2})\\s116\\sRUS$");
         Matcher matcher = pattern.matcher(number);
+
         if (!matcher.find()) {
             throw new RuntimeException("Невалидный номер");
         }
@@ -102,10 +95,14 @@ public class CarNumberServiceImpl implements CarNumberService {
         char[] initialLetterPartArr = initialLetterPart.toCharArray();
 
         if (digitalPart >= 1 && digitalPart < 999) {
+
             digitalPart++;
             nextDigitalPart = Integer.toString(digitalPart);
 
             if (digitalPart < 10) {
+
+                LOGGER.debug("Получаем следующий номер");
+
                 sbNextCarNumber.append(initialLetterPart);
                 sbNextCarNumber.append("00");
                 sbNextCarNumber.append(nextDigitalPart);
@@ -118,6 +115,9 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
 
             } else if (digitalPart < 100) {
+
+                LOGGER.debug("Получаем следующий номер");
+
                 sbNextCarNumber.append(initialLetterPart);
                 sbNextCarNumber.append("0");
                 sbNextCarNumber.append(nextDigitalPart);
@@ -129,6 +129,8 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
             }
 
+            LOGGER.debug("Получаем следующий номер");
+
             sbNextCarNumber.append(initialLetterPart);
             sbNextCarNumber.append(nextDigitalPart);
             sbNextCarNumber.append(secondLetterPartArr[0]);
@@ -139,6 +141,9 @@ public class CarNumberServiceImpl implements CarNumberService {
             return stringNextCarNumber;
 
         } else if (digitalPart == 999) {
+
+            LOGGER.debug("Получаем следующий номер");
+
             nextDigitalPart = "001";
 
             if (initialLetterPartArr[0] == ALPHABET.get(0) &&
@@ -155,6 +160,9 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
 
             } else if (secondLetterPartArr[1] == ALPHABET.get(11) && secondLetterPartArr[0] == ALPHABET.get(11)) {
+
+                LOGGER.debug("Получаем следующий номер");
+
                 sbNextCarNumber.append(getNextLetter(initialLetterPartArr[0]));
                 sbNextCarNumber.append(nextDigitalPart);
                 sbNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
@@ -165,6 +173,9 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
 
             } else if (secondLetterPartArr[1] == ALPHABET.get(11)) {
+
+                LOGGER.debug("Получаем следующий номер");
+
                 sbNextCarNumber.append(initialLetterPart);
                 sbNextCarNumber.append(nextDigitalPart);
                 sbNextCarNumber.append(getNextLetter(secondLetterPartArr[0]));
@@ -175,6 +186,9 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
 
             } else {
+
+                LOGGER.debug("Получаем следующий номер");
+
                 sbNextCarNumber.append(initialLetterPart);
                 sbNextCarNumber.append(nextDigitalPart);
                 sbNextCarNumber.append(secondLetterPartArr[0]);
@@ -185,16 +199,23 @@ public class CarNumberServiceImpl implements CarNumberService {
                 return stringNextCarNumber;
             }
         }
+
         carNumberRepository.save(new CarNumberEntity(stringNextCarNumber));
+
+        LOGGER.debug("Получаем следующий номер");
+
         return stringNextCarNumber;
     }
 
-    /**
-     * Метод выдающий следующею букву алфавита
-     * @param letter
-     * @return возвращает следующею букву
+    /** Метод получения следующей буквы из константы "ALPHABET"
+     *
+     * @param letter - буква из константы "ALPHABET"
+     * @return - следующая буква из константы "ALPHABET"
      */
-    String getNextLetter(char letter) {
+    private String getNextLetter(char letter) {
+
+        LOGGER.debug("Получаем следующею букву");
+
         String result = null;
         int lastLetterNumber = ALPHABET.size() - 1;
         int letterIndex = ALPHABET.indexOf(letter);
